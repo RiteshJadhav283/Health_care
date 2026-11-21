@@ -1,12 +1,13 @@
 import * as types from "./types";
 import axios from "axios";
+import { API_BASE_URL } from "../../config/api";
 
 //login user
 export const patientLogin = (data) => async (dispatch) => {
   try {
     console.log("this is data given by redux", data);
     dispatch({ type: types.LOGIN_PATIENT_REQUEST });
-    const res = await axios.post("http://127.0.0.1:3001/patients/login", data);
+    const res = await axios.post(`${API_BASE_URL}/patients/login`, data);
     dispatch({
       type: types.LOGIN_PATIENT_SUCCESS,
       payload: {
@@ -28,7 +29,7 @@ export const patientLogin = (data) => async (dispatch) => {
 
 export const CheckPatientExists = (data) => async (dispatch) => {
   try {
-    const res = await axios.post("http://127.0.0.1:3001/patients/check", data);
+    const res = await axios.post(`${API_BASE_URL}/patients/check`, data);
     dispatch({
       type: types.LOGIN_PATIENT_SUCCESS,
       payload: {
@@ -48,7 +49,7 @@ export const CheckPatientExists = (data) => async (dispatch) => {
 export const PatientSignup = (data) => async (dispatch) => {
   try {
     console.log("data given by redux", data);
-    const res = await axios.post("http://127.0.0.1:3001/patients/signup", data);
+    const res = await axios.post(`${API_BASE_URL}/patients/signup`, data);
     dispatch({
       type: types.LOGIN_PATIENT_SUCCESS,
       payload: {
@@ -72,7 +73,7 @@ export const PatientSignup = (data) => async (dispatch) => {
 export const DoctorLogin = (data) => async (dispatch) => {
   try {
     dispatch({ type: types.LOGIN_DOCTOR_REQUEST });
-    const res = await axios.post("http://127.0.0.1:3001/doctors/login", data);
+    const res = await axios.post(`${API_BASE_URL}/doctors/login`, data);
     console.log("doctor", res.data);
     dispatch({
       type: types.LOGIN_DOCTOR_SUCCESS,
@@ -97,7 +98,7 @@ export const DoctorLogin = (data) => async (dispatch) => {
 export const AdminLogin = (data) => async (dispatch) => {
   try {
     dispatch({ type: types.LOGIN_ADMIN_REQUEST });
-    const res = await axios.post("http://localhost:3001/admin/login", data);
+    const res = await axios.post(`${API_BASE_URL}/admin/login`, data);
     console.log("here", res.data.user);
     dispatch({
       type: types.LOGIN_ADMIN_SUCCESS,
@@ -123,10 +124,7 @@ export const DoctorRegister = (data) => async (dispatch) => {
   try {
     dispatch({ type: types.REGISTER_DOCTOR_REQUEST });
     console.log("here", data);
-    const res = await axios.post(
-      "http://127.0.0.1:3001/doctors/register",
-      data
-    );
+    const res = await axios.post(`${API_BASE_URL}/doctors/register`, data);
     return res.data;
   } catch (error) {
     dispatch({
@@ -143,7 +141,7 @@ export const AdminRegister = (data) => async (dispatch) => {
   try {
     console.log(data);
     dispatch({ type: types.REGISTER_ADMIN_REQUEST });
-    const res = await axios.post("http://127.0.0.1:3001/admin/register", data);
+    const res = await axios.post(`${API_BASE_URL}/admin/register`, data);
     return res.data;
   } catch (error) {
     dispatch({
@@ -160,7 +158,7 @@ export const AmbulanceRegister = (data) => async (dispatch) => {
   try {
     console.log("Data", data);
     dispatch({ type: types.REGISTER_AMBULANCE_REQUEST });
-    const res = await axios.post("http://127.0.0.1:3001/ambulances/add", data);
+    const res = await axios.post(`${API_BASE_URL}/ambulances/add`, data);
     console.log(res);
     return res.data;
   } catch (error) {
@@ -178,7 +176,7 @@ export const availabilityRegister = (data) => async (dispatch) => {
     console.log("ava data", data);
     dispatch({ type: types.ADD_AVAILABLETIMES_REQUEST });
     const res = await axios.post(
-      "http://127.0.0.1:3001/doctors/availability",
+      `${API_BASE_URL}/doctors/availability`,
       data
     );
     console.log(data);
@@ -208,7 +206,7 @@ export const authLogout = () => async (dispatch) => {
 //update patient
 export const updatePatient = (id, data, token) => async (dispatch) => {
   try {
-    const res = await axios.patch(`http://127.0.0.1:3001/patients/${id}`, data);
+    const res = await axios.patch(`${API_BASE_URL}/patients/${id}`, data);
     res.status === 200
       ? dispatch({ type: types.EDIT_PATIENT_REQUEST, payload: { token } })
       : console.log("passing");
@@ -230,7 +228,7 @@ export const updatePatient = (id, data, token) => async (dispatch) => {
 //update doctor
 export const UpdateDoctor = (id, data, token) => async (dispatch) => {
   try {
-    const res = await axios.patch(`http://127.0.0.1:3001/doctors/${id}`, data);
+    const res = await axios.patch(`${API_BASE_URL}/doctors/${id}`, data);
     res.status === 200
       ? dispatch({ type: types.EDIT_DOCTOR_REQUEST, payload: { token } })
       : console.log("passing");
@@ -251,7 +249,7 @@ export const UpdateDoctor = (id, data, token) => async (dispatch) => {
 
 export const UpdateAdmin = (id, data, token) => async (dispatch) => {
   try {
-    const res = await axios.patch(`http://127.0.0.1:3001/admin/${id}`, data);
+    const res = await axios.patch(`${API_BASE_URL}/admin/${id}`, data);
     res.status === 200
       ? dispatch({ type: types.EDIT_ADMIN_REQUEST, payload: { token } })
       : console.log("passing");
@@ -275,10 +273,9 @@ export const sendVerification = (data) => async (dispatch) => {
   try {
     dispatch({ type: types.EDIT_DOCTOR_REQUEST });
     const res = await axios.post(
-      `http://127.0.0.1:3001/admin/verification`,
+      `${API_BASE_URL}/admin/verification`,
       data
     );
-    // console.log(res);
     return res.data;
   } catch (error) {
     console.log(error);
@@ -287,23 +284,21 @@ export const sendVerification = (data) => async (dispatch) => {
 
 export const mailCreds = (data) => async (dispatch) => {
   try {
-    //dispatch({ type: types.EDIT_DOCTOR_REQUEST });
-    const res = await axios.post(`http://127.0.0.1:3001/admin/mailCreds`, data);
+    const res = await axios.post(`${API_BASE_URL}/admin/mailCreds`, data);
     console.log(res);
     return res.data;
   } catch (error) {
     console.log(error);
   }
 };
-//update doctor
+
 export const forgetPassword = (data) => async (dispatch) => {
   try {
     dispatch({ type: types.FORGET_PASSWORD_REQUEST });
     const res = await axios.post(
-      `https://zany-gray-clam-gear.cyclic.app/admin/forgot`,
+      `${API_BASE_URL}/admin/forgot`,
       data
     );
-    // console.log(res);
     return res.data;
   } catch (error) {
     console.log(error);
