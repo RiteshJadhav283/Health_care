@@ -1,4 +1,5 @@
 const express = require("express");
+const dbhelper = require("../configs/dbhelper");
 const {
   createReport,
   getLastReportId,
@@ -14,12 +15,26 @@ router.get("/:userType/:id", async (req, res) => {
   console.log("route :", userType, id);
 
   try {
-    const reports =
+    const rawReports =
       userType === "doctor"
         ? await getDoctorReports(id)
         : await getPatientReports(id);
+
+    const reports = await Promise.all(
+      rawReports.map(async (r) => {
+        try {
+          const medicines = await dbhelper.query(
+            "SELECT name, dosage, frequency, duration FROM medication WHERE reportid = $1",
+            [r.id]
+          );
+          return { ...r, medicines: medicines || [] };
+        } catch (e) {
+          return { ...r, medicines: [] };
+        }
+      })
+    );
+
     res.status(200).send({ message: "Successful", data: reports });
-    console.log("router reports", reports);
   } catch (error) {
     console.log(error);
     res.status(400).send({ message: "Error" });

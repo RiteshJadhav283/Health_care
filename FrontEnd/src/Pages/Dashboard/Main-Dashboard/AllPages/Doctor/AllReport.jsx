@@ -1,7 +1,7 @@
-import { Table } from "antd";
-import React from "react";
-import { useEffect } from "react";
+import { Table, Button, Modal, Space } from "antd";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { AiOutlineEye, AiOutlineDownload } from "react-icons/ai";
 import Sidebar from "../../GlobalFiles/Sidebar";
 import {
   GetAllData,
@@ -9,9 +9,35 @@ import {
   GetDoctorDetails,
   GetAllReports,
 } from "../../../../../Redux/Datas/action";
+import {
+  generateReportPDF,
+  getReportPDFBlobUrl,
+} from "../../../../../utils/generateReportPDF";
 
 const AllReport = () => {
   const dispatch = useDispatch();
+
+  const [previewModal, setPreviewModal] = useState({
+    open: false,
+    url: null,
+    report: null,
+  });
+
+  const handleViewPDF = (record) => {
+    const url = getReportPDFBlobUrl(record, user);
+    setPreviewModal({
+      open: true,
+      url: url,
+      report: record,
+    });
+  };
+
+  const handleClosePreview = () => {
+    if (previewModal.url) {
+      URL.revokeObjectURL(previewModal.url);
+    }
+    setPreviewModal({ open: false, url: null, report: null });
+  };
 
   useEffect(() => {
     dispatch(GetPatients());
@@ -30,16 +56,6 @@ const AllReport = () => {
     data: { user },
   } = useSelector((state) => state.auth);
 
-  console.log(data);
-  console.log("patients", patients);
-  console.log("doctors", doctors);
-  console.log("reports", reports);
-
-  console.log("report a gai ha", user);
-  console.log(user.id);
-  console.log(user.name);
-  console.log("userType", user?.userType);
-
   let Name;
   if (user?.userType === "patient") {
     Name = "Doctor Name";
@@ -49,21 +65,64 @@ const AllReport = () => {
 
   const reportColumns = [
     { title: Name, dataIndex: "name", key: "name" },
-    { title: "Date", dataIndex: "date", key: "date" },
-    { title: "time", dataIndex: "time", key: "time" },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (text) => (text ? new Date(text).toLocaleDateString() : "N/A"),
+    },
+    { title: "Time", dataIndex: "time", key: "time" },
     { title: "Disease", dataIndex: "disease", key: "disease" },
-    { title: "Temperature(F^0)", dataIndex: "temperature", key: "temperature" },
-    { title: "Weight(kg)", dataIndex: "weight", key: "weight" },
-    { title: "Bloodpressure(mmHg)", dataIndex: "bp", key: "bp" },
+    { title: "Temp (°F)", dataIndex: "temperature", key: "temperature" },
+    { title: "Weight (kg)", dataIndex: "weight", key: "weight" },
+    { title: "BP (mmHg)", dataIndex: "bp", key: "bp" },
     { title: "Glucose", dataIndex: "glucose", key: "glucose" },
+    {
+      title: "Actions",
+      key: "action",
+      render: (_, record) => (
+        <Space size="small">
+          <Button
+            type="default"
+            icon={<AiOutlineEye style={{ fontSize: "15px" }} />}
+            style={{
+              borderColor: "#184C78",
+              color: "#184C78",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              borderRadius: "4px",
+              fontWeight: "500",
+            }}
+            onClick={() => handleViewPDF(record)}
+          >
+            View PDF
+          </Button>
+          <Button
+            type="primary"
+            icon={<AiOutlineDownload style={{ fontSize: "15px" }} />}
+            style={{
+              backgroundColor: "#184C78",
+              borderColor: "#184C78",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              borderRadius: "4px",
+              fontWeight: "500",
+            }}
+            onClick={() => generateReportPDF(record, user)}
+          >
+            Download
+          </Button>
+        </Space>
+      ),
+    },
   ];
 
   return (
     <>
       <div className="container">
         <Sidebar />
-
-        {/* ************************************ */}
 
         <div className="AfterSideBar">
           <h1 style={{ color: "rgb(184 191 234)" }}>Reports</h1>
@@ -78,6 +137,47 @@ const AllReport = () => {
           </div>
         </div>
       </div>
+
+      {/* PDF View Modal */}
+      <Modal
+        title={`Medical Report Preview — #REP-${previewModal.report?.id || ""}`}
+        open={previewModal.open}
+        onCancel={handleClosePreview}
+        width={850}
+        style={{ top: 20 }}
+        footer={[
+          <Button key="close" onClick={handleClosePreview}>
+            Close
+          </Button>,
+          <Button
+            key="newtab"
+            icon={<AiOutlineEye />}
+            onClick={() => window.open(previewModal.url, "_blank")}
+          >
+            Open in New Tab
+          </Button>,
+          <Button
+            key="download"
+            type="primary"
+            icon={<AiOutlineDownload />}
+            style={{ backgroundColor: "#184C78", borderColor: "#184C78" }}
+            onClick={() => generateReportPDF(previewModal.report, user)}
+          >
+            Download PDF
+          </Button>,
+        ]}
+        destroyOnClose
+      >
+        {previewModal.url && (
+          <iframe
+            src={previewModal.url}
+            title="Medical Report PDF Preview"
+            width="100%"
+            height="580px"
+            style={{ border: "1px solid #e2e8f0", borderRadius: "6px" }}
+          />
+        )}
+      </Modal>
     </>
   );
 };

@@ -21,17 +21,33 @@ from reports
 ORDER BY id DESC
 LIMIT 1;`;
 
-const getPatientReportQuery = `SELECT doctors.name,
-reports.*
+const getPatientReportQuery = `SELECT 
+  doctors.name,
+  doctors.name AS doctor_name,
+  doctors.department AS doctor_department,
+  patients.name AS patient_name,
+  patients.age AS patient_age,
+  patients.gender AS patient_gender,
+  reports.*
 FROM reports
 JOIN doctors ON reports.doctorid = doctors.id
-WHERE reports.patientid = $1;`;
+JOIN patients ON reports.patientid = patients.id
+WHERE reports.patientid = $1
+ORDER BY reports.id DESC;`;
 
-const getDoctorReportQuery = `SELECT patients.name,
-reports.*
+const getDoctorReportQuery = `SELECT 
+  patients.name,
+  patients.name AS patient_name,
+  patients.age AS patient_age,
+  patients.gender AS patient_gender,
+  doctors.name AS doctor_name,
+  doctors.department AS doctor_department,
+  reports.*
 FROM reports
 JOIN patients ON reports.patientid = patients.id
-WHERE reports.doctorid = $1;`;
+JOIN doctors ON reports.doctorid = doctors.id
+WHERE reports.doctorid = $1
+ORDER BY reports.id DESC;`;
 
 module.exports = {
   getLastReportIdQuery,
