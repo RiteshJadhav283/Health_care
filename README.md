@@ -2,6 +2,8 @@
 
 Welcome to E-Health Management Hub, a comprehensive Hospital Management System web application developed with React, Express, Node, and PostgreSQL. This system is designed to streamline hospital operations, enhance communication between patients and healthcare providers, and ensure efficient management of healthcare-related activities.
 
+🔗 **Live Frontend Application**: [https://health-care-six-ivory.vercel.app/](https://health-care-six-ivory.vercel.app/)
+
 ## Features
 
 ### Role-Based Access
@@ -18,9 +20,9 @@ E-Health Management Hub incorporates role-based access control with three distin
 
 Patients can easily book appointments with their preferred doctors using the intuitive interface. The system ensures smooth scheduling and helps patients manage their healthcare appointments efficiently.
 
-### Report Generation
+### Report Generation & PDF Export
 
-Doctors can generate detailed reports for their patients, providing a comprehensive overview of their medical history, prescriptions, vitals, and other relevant information. This feature aids in maintaining accurate and up-to-date patient records.
+Doctors can generate detailed medical reports for their patients, providing a comprehensive overview of their medical history, prescriptions, vitals, and diagnostic details. Both Doctors and Patients can view and download clinical reports in **PDF format**.
 
 ## Documentation
 
@@ -36,8 +38,8 @@ Ensure you have the following installed on your machine:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/aa-del9/E-Health-Management-Hub.git
-   cd E-Health-Management-Hub
+   git clone https://github.com/SamarthD1/Health_care.git
+   cd Health_care
    ```
 
 2. Start the backend express server:
@@ -47,7 +49,7 @@ Ensure you have the following installed on your machine:
    npm run dev
    ```
 
-   Make sure u have ur postgres server running. Before running the server, configure your postgres credentials and other environment variables in the .env file. Refer to the `example.env` file for reference.
+   Make sure you have your postgres server running. Before running the server, configure your postgres credentials and other environment variables in the `.env` file. Refer to the `example.env` file for reference.
 
 3. Start React app:
 
