@@ -117,6 +117,7 @@ const Check_Appointment = () => {
   };
   useEffect(() => {
     dispatch(GetAppointments(data.user.userType, data.user.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (data?.isAuthenticated === false) {

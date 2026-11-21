@@ -1,13 +1,11 @@
 import { Table } from "antd";
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { GetPatients } from "../../../../../Redux/Datas/action";
 import Sidebar from "../../GlobalFiles/Sidebar";
 import Topbar from "../../GlobalFiles/Topbar";
 
 const Patient_Details = () => {
-  const dispatch = useDispatch();
   const { data } = useSelector((store) => store.auth);
   const { patients } = useSelector((store) => store.data.patients);
   console.log(patients);

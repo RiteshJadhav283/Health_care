@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import "../Doctor/CSS/Doctor_Profile.css";
 import { BiMoney, BiTime } from "react-icons/bi";
 import { GiMeditation } from "react-icons/gi";
-import { AiFillCalendar, AiFillClockCircle } from "react-icons/ai";
-import { MdBloodtype, MdCastForEducation, MdEmail } from "react-icons/md";
+import { AiFillClockCircle } from "react-icons/ai";
+import { MdCastForEducation, MdEmail } from "react-icons/md";
 import { BsFillTelephoneFill } from "react-icons/bs";
-import { BsHouseFill, BsGenderAmbiguous } from "react-icons/bs";
-import { MdOutlineCastForEducation } from "react-icons/md";
+import { BsHouseFill } from "react-icons/bs";
 import { FaRegHospital, FaMapMarkedAlt, FaBirthdayCake } from "react-icons/fa";
 import Sidebar from "../../GlobalFiles/Sidebar";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,6 +30,7 @@ const Doctor_Profile = () => {
   console.log(doctor);
   useEffect(() => {
     dispatch(GetDoctorDetails());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [detailsOpen, setDetailsOpen] = useState(false);

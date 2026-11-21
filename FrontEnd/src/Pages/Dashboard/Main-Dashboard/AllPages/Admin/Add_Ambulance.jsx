@@ -25,6 +25,7 @@ const Add_Ambulance = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  console.log(loading);
 
   const dispatch = useDispatch();
 

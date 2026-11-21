@@ -40,6 +40,7 @@ const Book_Appointment = () => {
   const [BookAppoint, setBookAppoint] = useState(InitValue);
   useEffect(() => {
     dispatch(GetDoctorDetails());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const HandleAppointment = (e) => {
     console.log(e.target.name, e.target.value);

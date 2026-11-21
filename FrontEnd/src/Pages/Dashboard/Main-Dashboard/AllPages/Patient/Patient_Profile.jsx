@@ -29,6 +29,7 @@ const Patient_Profile = () => {
 
   useEffect(() => {
     dispatch(GetPatients());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);

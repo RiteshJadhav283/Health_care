@@ -43,15 +43,11 @@ const AllReport = () => {
     dispatch(GetPatients());
     dispatch(GetDoctorDetails());
     dispatch(GetAllData());
-    dispatch(GetAllReports(user?.userType, user.id));
+    dispatch(GetAllReports(user?.userType, user?.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { patients } = useSelector((store) => store.data.patients);
-  const { doctors } = useSelector((store) => store.data.doctors);
   const { reports } = useSelector((store) => store.data.reports);
-  const {
-    dashboard: { data },
-  } = useSelector((store) => store.data);
   const {
     data: { user },
   } = useSelector((state) => state.auth);

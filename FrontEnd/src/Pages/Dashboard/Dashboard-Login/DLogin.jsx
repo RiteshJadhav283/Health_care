@@ -18,10 +18,7 @@ const notify = (text) => toast(text);
 
 const DLogin = () => {
   const [open, setOpen] = useState(false);
-
-  const showDrawer = () => {
-    setOpen(true);
-  };
+  console.log(open);
 
   const toSignUp = () => {
     return navigate("/signup");
