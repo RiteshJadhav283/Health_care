@@ -1,33 +1,26 @@
 # MediCore AWS deployment (first working deployment)
 
-This repository has a React frontend and an Express API backed by PostgreSQL. This guide deploys the API as a Docker container on AWS App Runner and the database on Amazon RDS for PostgreSQL. It does not create AWS resources automatically; follow the steps in your AWS account and review the current prices before creating billable resources.
+This repository has a React frontend and an Express API backed by PostgreSQL. This guide deploys the API as a Docker container with Amazon ECS Express Mode and the database on Amazon RDS for PostgreSQL. It does not create AWS resources automatically; follow the steps in your AWS account and review the current prices before creating billable resources.
 
 ## 1. Prepare PostgreSQL
 
 Create an RDS PostgreSQL database in the same AWS region as App Runner. For a temporary demonstration, choose a small burstable instance, enable storage encryption, set a strong generated master password, and keep **Public access = No**. Create a database named `healthcare` and note the endpoint, database username, and password. In the RDS security group, allow inbound TCP 5432 only from the App Runner VPC connector security group (created below), never from `0.0.0.0/0`.
 
-Run the schema once from a trusted machine that can reach the database, or from a temporary EC2 instance in the same VPC:
-
-```sh
-cd Backend
-npm ci
-PG_HOST='<RDS endpoint>' PG_PORT=5432 PG_DATABASE=healthcare PG_USER='<db user>' PG_PASSWORD='<db password>' PG_SSL=true node scripts/migrate.js
-```
+Run the schema once from a temporary EC2 instance in the same VPC after network rules are configured. Do not make the database public just to run the migration.
 
 The migration creates the tables and the `doctor_details` / `patient_details` views expected by current queries. It is designed for an empty database. It does not migrate existing records.
 
 ## 2. Build and publish the backend image
 
-Create a private Amazon ECR repository (for example `medicore-api`). From the repository root, build and push `Backend/Dockerfile` using the AWS Console's ECR push commands. The image listens on port 3001 and has a `/health` endpoint for App Runner.
+Create a private Amazon ECR repository (for example `medicore-api`). Build and push `Backend/Dockerfile` from your Mac using the AWS CLI and Docker. The image listens on port 3001 and has a `/health` endpoint.
 
-## 3. Connect App Runner to the private database
+## 3. Connect ECS Express Mode to the private database
 
-Create a VPC connector in the VPC/subnets containing the RDS instance. Give it a dedicated security group. In the RDS security group, allow TCP 5432 from that connector security group. The connector's subnets need outbound connectivity to the database; App Runner's ECR image retrieval is handled by App Runner.
+The ECS Express Mode service and RDS instance must use a compatible VPC/network setup. Configure the ECS service with private subnets and a service security group. In the RDS security group, allow TCP 5432 only from that service security group. Keep the database private. Configure the service's load balancer to be internet-facing so Vercel can reach the API.
 
-Create an App Runner service from the ECR image, set port `3001`, and attach the VPC connector. Configure health check path `/health`. Set these runtime variables in App Runner:
+Create an ECS Express Mode service from the private ECR image. Set the container port to `3001` and health check path `/health`. Configure environment variables and secrets:
 
 ```text
-PORT=3001
 PG_HOST=<RDS endpoint>
 PG_PORT=5432
 PG_DATABASE=healthcare
@@ -38,21 +31,24 @@ KEY=<long random secret, at least 32 bytes>
 CORS_ORIGINS=<your exact Vercel site URL>
 ```
 
-Store the database password and `KEY` as App Runner secrets from AWS Secrets Manager or Parameter Store. Do not commit actual secrets into GitHub or place them in the frontend environment. App Runner public ingress is needed for Vercel to call the API; use HTTPS and keep the database private.
+Store the database password and `KEY` in AWS Secrets Manager and reference them as ECS container secrets. Do not commit actual secrets into GitHub or put them in the frontend environment. ECS Express Mode creates an HTTPS endpoint through its load balancer.
 
 ## 4. Point Vercel at the API
 
-In the Vercel project settings, set the build-time variable:
+In the Vercel project settings or in `FrontEnd/.env.production`, set the build-time variable:
 
 ```text
-REACT_APP_API_BASE_URL=https://<App Runner service hostname>
+REACT_APP_API_BASE_URL=https://me-6b34abc099ee4c95942b6196643b9290.ecs.ap-south-1.on.aws
 ```
 
-Redeploy the frontend. Set `CORS_ORIGINS` in App Runner to the exact deployed Vercel origin, such as `https://your-project.vercel.app` (no trailing slash). If you use a custom domain, include its exact origin too, comma-separated.
+Redeploy the frontend. Set `CORS_ORIGINS` in the ECS service to the exact deployed Vercel origin:
+```text
+CORS_ORIGINS=http://localhost:3000,https://health-care-six-ivory.vercel.app
+```
 
 ## 5. Check it
 
-Open `https://<App Runner service hostname>/health`. A successful response is `{"status":"ok","database":"ok"}`. Then load the Vercel site and check its browser network panel for API calls. Review App Runner logs if the health check returns 503.
+Open `https://me-6b34abc099ee4c95942b6196643b9290.ecs.ap-south-1.on.aws/health`. A successful response is `{"status":"ok","database":"ok"}`. Then load `https://health-care-six-ivory.vercel.app` and check its browser network panel for API calls. Review the service's CloudWatch logs if any error occurs.
 
 ## Important current application limitations
 
@@ -60,4 +56,4 @@ Open `https://<App Runner service hostname>/health`. A successful response is `{
 - The existing app stores passwords as plain text and some endpoints expose user records. Do not use real patient or personal data until authentication, password hashing, authorization, and data exposure are fixed.
 - Current login JWT payloads contain only a placeholder and authorization middleware does not yet establish a user identity. Treat this as a demo deployment, not a production healthcare system.
 - The current route code has other functional defects that may surface during end-to-end use. Deployment only makes the service reachable; it does not certify the app's features or security.
-- Terminate or scale down billable resources after the demo. RDS and App Runner can incur charges while idle; check AWS pricing for the selected region and configuration.
+- Terminate or scale down billable resources after the demo. RDS, Fargate, load balancer, and logging can incur charges; check AWS pricing for the selected region and configuration.

@@ -1,2 +1,3 @@
 export const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:3001";
+  process.env.REACT_APP_API_BASE_URL ||
+  "https://me-6b34abc099ee4c95942b6196643b9290.ecs.ap-south-1.on.aws";

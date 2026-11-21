@@ -1,3 +1,7 @@
 *.sql
 !Backend/migrations/001_initial_schema.sql
 /.vscode
+.DS_Store
+Backend/.DS_Store
+install.sh
+install.sh.sig
