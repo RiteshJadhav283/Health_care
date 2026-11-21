@@ -3,5 +3,6 @@ module.exports = {
   user: process.env.PG_USER, // PostgreSQL username
   database: process.env.PG_DATABASE, // PostgreSQL database name
   password: process.env.PG_PASSWORD, // PostgreSQL password
-  port: process.env.PG_PORT, // PostgreSQL port
+  port: Number(process.env.PG_PORT || 5432), // PostgreSQL port
+  ssl: process.env.PG_SSL === "true" ? { rejectUnauthorized: false } : false,
 };

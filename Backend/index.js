@@ -12,11 +12,26 @@ const reportRouter = require("./routes/Reports.Route");
 
 const app = express();
 const db = require("./configs/db");
+const port = Number(process.env.PORT || process.env.port || 3001);
+const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:3000")
+  .split(",").map((origin) => origin.trim()).filter(Boolean);
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin(origin, callback) {
+  if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+  return callback(new Error("Origin not allowed by CORS"));
+} }));
 
 app.get("/", (req, res) => {
   res.send("Healthcare System");
+});
+
+app.get("/health", async (req, res) => {
+  try {
+    await db.query("SELECT 1");
+    res.status(200).json({ status: "ok", database: "ok" });
+  } catch (error) {
+    res.status(503).json({ status: "error", database: "unavailable" });
+  }
 });
 
 app.use("/admin", adminRouter);
@@ -28,14 +43,4 @@ app.use("/patients", patientRouter);
 app.use("/prescriptions", prescriptionRouter);
 app.use("/reports", reportRouter);
 
-app.listen(process.env.port, async () => {
-  await db.query("SELECT NOW()", (err, result) => {
-    if (err) {
-      console.error("Error connecting to the database:", err);
-    } else {
-      console.log("Connected to the database at", result.rows[0].now);
-    }
-  });
-  console.log("Connected to DB");
-  console.log(`Listening at port ${process.env.port}`);
-});
+app.listen(port, () => console.log(`Listening at port ${port}`));
