@@ -39,21 +39,22 @@ router.post("/login", async (req, res) => {
   const { ID, password } = req.body;
   try {
     const patient = await findCred(ID);
-    if (ID == patient[0].id && password == patient[0].password) {
+    if (patient && patient.length > 0 && ID == patient[0].id && password == patient[0].password) {
       const token = jwt.sign({ foo: "bar" }, process.env.KEY, {
         expiresIn: "24h",
       });
-      res.send({
+      return res.send({
         message: "Successful",
         user: { ...patient[0], userType: "patient" },
         token: token,
       });
     } else {
-      res.send({ message: "Wrong credentials" });
+      return res.send({ message: "Wrong credentials" });
     }
   } catch (error) {
     console.log({ message: "Error" });
     console.log(error);
+    return res.status(500).send({ message: "Error", error: error.message });
   }
 });
 

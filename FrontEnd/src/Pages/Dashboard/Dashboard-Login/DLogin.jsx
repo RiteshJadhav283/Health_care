@@ -47,21 +47,18 @@ const DLogin = () => {
     if (formValue.ID !== "" && formValue.password !== "") {
       if (placement === "Patient") {
         dispatch(patientLogin(formValue)).then((res) => {
-          if (res.message === "Successful") {
+          setLoading(false);
+          if (res && res.message === "Successful") {
             notify("Login Successful");
-            setLoading(false);
             return navigate("/dashboard");
           }
-          if (res.message === "Wrong credentials") {
-            setLoading(false);
-
-            notify("Wrong credentials");
+          if (res && res.message === "Wrong credentials") {
+            return notify("Wrong credentials");
           }
-          if (res.message === "Error") {
-            setLoading(false);
-
-            notify("Something went Wrong, Please Try Again");
-          }
+          return notify("Something went Wrong, Please Try Again");
+        }).catch(() => {
+          setLoading(false);
+          notify("Something went Wrong, Please Try Again");
         });
       } else if (placement === "Doctor") {
         let data = {
@@ -70,22 +67,18 @@ const DLogin = () => {
         };
         console.log(data);
         dispatch(DoctorLogin(data)).then((res) => {
-          if (res.message === "Successful") {
+          setLoading(false);
+          if (res && res.message === "Successful") {
             notify("Login Successful");
-            setLoading(false);
-
             return navigate("/dashboard");
           }
-          if (res.message === "Wrong credentials") {
-            setLoading(false);
-
-            notify("Wrong credentials");
+          if (res && res.message === "Wrong credentials") {
+            return notify("Wrong credentials");
           }
-          if (res.message === "Error") {
-            setLoading(false);
-
-            notify("Something went Wrong, Please Try Again");
-          }
+          return notify("Something went Wrong, Please Try Again");
+        }).catch(() => {
+          setLoading(false);
+          notify("Something went Wrong, Please Try Again");
         });
       } else if (placement === "Admin") {
         let data = {
@@ -93,16 +86,19 @@ const DLogin = () => {
           adminID: formValue.ID,
         };
         dispatch(AdminLogin(data)).then((res) => {
-          if (res.message === "Successful") {
+          setLoading(false);
+          if (res && res.message === "Successful") {
             notify("Login Successful");
-            setLoading(false);
-
             return navigate("/dashboard");
           }
-          if (res.message === "Wrong credentials") {
-            setLoading(false);
-
-            notify("Wrong credentials");
+          if (res && res.message === "Wrong credentials") {
+            return notify("Wrong credentials");
+          }
+          return notify("Something went Wrong, Please Try Again");
+        }).catch(() => {
+          setLoading(false);
+          notify("Something went Wrong, Please Try Again");
+        });
           }
           if (res.message === "Error") {
             setLoading(false);

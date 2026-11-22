@@ -24,6 +24,7 @@ export const patientLogin = (data) => async (dispatch) => {
         message: error,
       },
     });
+    return { message: "Error" };
   }
 };
 
@@ -44,6 +45,7 @@ export const CheckPatientExists = (data) => async (dispatch) => {
         message: error,
       },
     });
+    return { message: "Error" };
   }
 };
 export const PatientSignup = (data) => async (dispatch) => {
@@ -66,6 +68,7 @@ export const PatientSignup = (data) => async (dispatch) => {
         message: error,
       },
     });
+    return { message: "Error" };
   }
 };
 
@@ -91,6 +94,7 @@ export const DoctorLogin = (data) => async (dispatch) => {
         message: error,
       },
     });
+    return { message: "Error" };
   }
 };
 
@@ -116,6 +120,7 @@ export const AdminLogin = (data) => async (dispatch) => {
         message: error,
       },
     });
+    return { message: "Error" };
   }
 };
 

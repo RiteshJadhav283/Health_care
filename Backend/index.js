@@ -13,20 +13,15 @@ const reportRouter = require("./routes/Reports.Route");
 const app = express();
 const db = require("./configs/db");
 const port = Number(process.env.PORT || process.env.APP_PORT || process.env.port || 3001);
-const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:3000,https://health-care-six-ivory.vercel.app")
-  .split(",").map((origin) => origin.trim()).filter(Boolean);
+
 app.use(express.json());
-app.use(cors({ origin(origin, callback) {
-  if (
-    !origin ||
-    allowedOrigins.includes("*") ||
-    allowedOrigins.includes(origin) ||
-    origin.endsWith(".vercel.app")
-  ) {
-    return callback(null, true);
-  }
-  return callback(new Error("Origin not allowed by CORS"));
-} }));
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "token", "origin", "accept"]
+}));
+app.options("*", cors());
 
 app.get("/", (req, res) => {
   res.send("Healthcare System");

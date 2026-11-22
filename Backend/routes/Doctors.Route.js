@@ -49,21 +49,22 @@ router.post("/login", async (req, res) => {
   const { docID, password } = req.body;
   try {
     const doctor = await findById(docID);
-    if (docID == doctor[0].id && password == doctor[0].password) {
+    if (doctor && doctor.length > 0 && docID == doctor[0].id && password == doctor[0].password) {
       const token = jwt.sign({ foo: "bar" }, process.env.KEY, {
         expiresIn: "24h",
       });
-      res.send({
+      return res.send({
         message: "Successful",
         user: { ...doctor[0], userType: "doctor" },
         token: token,
       });
     } else {
-      res.send({ message: "Wrong credentials" });
+      return res.send({ message: "Wrong credentials" });
     }
   } catch (error) {
     console.log({ message: "Error" });
     console.log(error);
+    return res.status(500).send({ message: "Error", error: error.message });
   }
 });
 
