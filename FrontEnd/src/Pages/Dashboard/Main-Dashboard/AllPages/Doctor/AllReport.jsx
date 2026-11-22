@@ -23,8 +23,8 @@ const AllReport = () => {
     report: null,
   });
 
-  const handleViewPDF = (record) => {
-    const url = getReportPDFBlobUrl(record, user);
+  const handleViewPDF = async (record) => {
+    const url = await getReportPDFBlobUrl(record, user);
     setPreviewModal({
       open: true,
       url: url,
