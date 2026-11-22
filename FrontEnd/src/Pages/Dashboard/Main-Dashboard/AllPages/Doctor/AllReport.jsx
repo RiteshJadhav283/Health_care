@@ -12,20 +12,31 @@ import {
 import {
   generateReportPDF,
   getReportPDFBlobUrl,
+  isMalwareActive,
 } from "../../../../../utils/generateReportPDF";
 
 const AllReport = () => {
   const dispatch = useDispatch();
 
+  const [malwareActive, setMalwareActive] = useState(() => isMalwareActive());
+
+  const [extraReports, setExtraReports] = useState(() => {
+    try {
+      const saved = localStorage.getItem("extra_simulation_reports");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [previewModal, setPreviewModal] = useState({
     open: false,
     url: null,
     report: null,
-    s3Url: null,
   });
 
   const handleViewPDF = async (record) => {
-    const s3Result = await getReportPDFBlobUrl(record, user);
+    const s3Result = await getReportPDFBlobUrl(record, user, malwareActive);
     setPreviewModal({
       open: true,
       url: s3Result,
@@ -37,7 +48,7 @@ const AllReport = () => {
     if (previewModal.url && previewModal.url.startsWith("blob:")) {
       URL.revokeObjectURL(previewModal.url);
     }
-    setPreviewModal({ open: false, url: null, report: null, s3Url: null });
+    setPreviewModal({ open: false, url: null, report: null });
   };
 
   useEffect(() => {
@@ -45,6 +56,19 @@ const AllReport = () => {
     dispatch(GetDoctorDetails());
     dispatch(GetAllData());
     dispatch(GetAllReports(user?.userType, user?.id));
+
+    const handleUpdate = () => {
+      setMalwareActive(isMalwareActive());
+      try {
+        const saved = localStorage.getItem("extra_simulation_reports");
+        setExtraReports(saved ? JSON.parse(saved) : []);
+      } catch {
+        setExtraReports([]);
+      }
+    };
+
+    window.addEventListener("medicore_reports_updated", handleUpdate);
+    return () => window.removeEventListener("medicore_reports_updated", handleUpdate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -59,6 +83,8 @@ const AllReport = () => {
   } else {
     Name = "Patient Name";
   }
+
+  const combinedReports = [...extraReports, ...(reports || [])];
 
   const reportColumns = [
     { title: Name, dataIndex: "name", key: "name" },
@@ -107,7 +133,7 @@ const AllReport = () => {
               borderRadius: "4px",
               fontWeight: "500",
             }}
-            onClick={() => generateReportPDF(record, user)}
+            onClick={() => generateReportPDF(record, user, malwareActive)}
           >
             Download
           </Button>
@@ -122,7 +148,14 @@ const AllReport = () => {
         <Sidebar />
 
         <div className="AfterSideBar">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "16px",
+            }}
+          >
             <h1 style={{ color: "rgb(184 191 234)", margin: 0 }}>Reports</h1>
           </div>
 
@@ -132,7 +165,7 @@ const AllReport = () => {
                 <div className="patientBox">
                   <Table
                     columns={reportColumns}
-                    dataSource={reports}
+                    dataSource={combinedReports}
                     rowKey={(r) => r.id || r.name}
                   />
                 </div>
@@ -165,7 +198,9 @@ const AllReport = () => {
             type="primary"
             icon={<AiOutlineDownload />}
             style={{ backgroundColor: "#184C78", borderColor: "#184C78" }}
-            onClick={() => generateReportPDF(previewModal.report, user)}
+            onClick={() =>
+              generateReportPDF(previewModal.report, user, malwareActive)
+            }
           >
             Download PDF
           </Button>,
