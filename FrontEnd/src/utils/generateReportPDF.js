@@ -1,17 +1,20 @@
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-// Live S3 Bucket for Unsecured Baseline Backend in AWS ap-south-1
-export const S3_BASE_URL = "https://medicore-baseline-reports-017080036675.s3.ap-south-1.amazonaws.com/reports";
+// Live S3 Buckets in AWS ap-south-1
+export const BASELINE_S3_BASE_URL = "https://medicore-baseline-reports-017080036675.s3.ap-south-1.amazonaws.com/reports";
+export const CLEAN_S3_BASE_URL = "https://medicore-patient-reports-017080036675.s3.ap-south-1.amazonaws.com/reports";
 
-export const getS3ReportUrl = (report) => {
+export const getS3ReportUrl = (report, isRansomware = true) => {
   const paddedId = String(report.id || 1).padStart(4, "0");
   const cleanName = (report.patient_name || report.name || "Patient").trim().replace(/\s+/g, "_");
   const filename = `Report_${paddedId}_${cleanName}.pdf`;
-  return `${S3_BASE_URL}/${filename}`;
+  const baseUrl = isRansomware ? BASELINE_S3_BASE_URL : CLEAN_S3_BASE_URL;
+  return `${baseUrl}/${filename}`;
 };
 
-export const fetchS3ReportBlobUrl = async (report) => {
-  const s3Url = getS3ReportUrl(report);
+export const fetchS3ReportBlobUrl = async (report, isRansomware = true) => {
+  const s3Url = getS3ReportUrl(report, isRansomware);
   try {
     const response = await fetch(s3Url, { cache: "no-store" });
     if (response.ok) {
@@ -24,8 +27,8 @@ export const fetchS3ReportBlobUrl = async (report) => {
   return null;
 };
 
-// Fallback client-side generator if offline
-export const createReportPDFDoc = (report, currentUser = null) => {
+// Generates the DarkSurge 5.0 BTC Ransomware Extortion Document
+export const createRansomwarePDFDoc = (report, currentUser = null) => {
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -177,8 +180,189 @@ export const createReportPDFDoc = (report, currentUser = null) => {
   return { doc, patientName: "ENCRYPTED_PATIENT_RECORD" };
 };
 
-export const generateReportPDF = async (report, currentUser = null) => {
-  const s3Url = getS3ReportUrl(report);
+// Generates the Authentic Clean E-Health Clinical Medical Record
+export const createCleanReportPDFDoc = (report, currentUser = null) => {
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  const primaryColor = [24, 76, 120]; // #184C78 deep blue
+  const textColor = [33, 37, 41];
+  const lightGray = [245, 247, 250];
+
+  // Header Banner
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, pageWidth, 26, "F");
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("E-HEALTH MANAGEMENT HUB", 14, 11);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text("HOSPITAL & PATIENT HEALTHCARE MANAGEMENT SYSTEM", 14, 17);
+
+  doc.setFontSize(8);
+  doc.text("Official Clinical Medical Record", pageWidth - 14, 17, { align: "right" });
+
+  // Subheader title bar
+  doc.setFillColor(235, 242, 250);
+  doc.rect(0, 26, pageWidth, 9, "F");
+  doc.setTextColor(30, 60, 90);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("PATIENT EXAMINATION & DIAGNOSTIC REPORT", 14, 32);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  const formattedDate = report.date ? new Date(report.date).toLocaleDateString() : "N/A";
+  doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - 14, 32, { align: "right" });
+
+  // Patient & Doctor Information Box
+  let startY = 42;
+  doc.setDrawColor(210, 220, 230);
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(14, startY, pageWidth - 28, 38, 2, 2, "FD");
+
+  const doctorName =
+    report.doctor_name ||
+    (currentUser?.userType === "doctor" ? currentUser.name : report.name) ||
+    "Dr. Joseph Torres";
+  const patientName =
+    report.patient_name ||
+    (currentUser?.userType === "patient" ? currentUser.name : report.name) ||
+    "John Doe";
+  const department = report.doctor_department || "General Medicine";
+
+  // Left Column (Patient)
+  doc.setTextColor(...textColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("PATIENT INFORMATION", 18, startY + 7);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.text("Patient Name:", 18, startY + 14);
+  doc.setFont("helvetica", "bold");
+  doc.text(`${patientName}`, 42, startY + 14);
+
+  doc.setFont("helvetica", "normal");
+  doc.text("Patient ID:", 18, startY + 21);
+  doc.text(`P-${report.patientid || "1"}`, 42, startY + 21);
+
+  doc.text("Age / Gender:", 18, startY + 28);
+  doc.text(`${report.patient_age || "28"} yrs / ${report.patient_gender || "M"}`, 42, startY + 28);
+
+  // Right Column (Consultation Details)
+  const col2X = pageWidth / 2 + 5;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("CONSULTATION DETAILS", col2X, startY + 7);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.text("Report ID:", col2X, startY + 14);
+  doc.setFont("helvetica", "bold");
+  doc.text(`#REP-${report.id || "41"}`, col2X + 26, startY + 14);
+
+  doc.setFont("helvetica", "normal");
+  doc.text("Date & Time:", col2X, startY + 21);
+  doc.text(`${formattedDate} at ${report.time || "16:45:00"}`, col2X + 26, startY + 21);
+
+  doc.text("Doctor:", col2X, startY + 28);
+  doc.text(`${doctorName} (${department})`, col2X + 26, startY + 28);
+
+  // Vitals Table
+  startY += 45;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(...primaryColor);
+  doc.text("1. CLINICAL VITALS", 14, startY);
+
+  autoTable(doc, {
+    startY: startY + 3,
+    margin: { left: 14, right: 14 },
+    theme: "grid",
+    head: [["Temperature", "Blood Pressure", "Weight", "Blood Glucose"]],
+    body: [
+      [
+        report.temperature ? `${report.temperature} °F` : "98.5 °F",
+        report.bp ? `${report.bp} mmHg` : "132/84 mmHg",
+        report.weight ? `${report.weight} kg` : "94.6 kg",
+        report.glucose ? `${report.glucose} mg/dL` : "106 mg/dL",
+      ],
+    ],
+    headStyles: {
+      fillColor: primaryColor,
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+      fontSize: 8.5,
+    },
+    bodyStyles: {
+      textColor: textColor,
+      fontSize: 8.5,
+    },
+  });
+
+  // Diagnosis Section
+  startY = doc.lastAutoTable.finalY + 8;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(...primaryColor);
+  doc.text("2. DIAGNOSIS & CLINICAL NOTES", 14, startY);
+
+  doc.setFillColor(...lightGray);
+  doc.setDrawColor(210, 220, 230);
+  doc.roundedRect(14, startY + 3, pageWidth - 28, 24, 2, 2, "FD");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...textColor);
+  doc.text("Primary Diagnosis:", 18, startY + 10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(180, 40, 40);
+  doc.text(`${report.disease || "Lumbar Spondylosis"}`, 50, startY + 10);
+
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...textColor);
+  doc.text("Physician Notes:", 18, startY + 18);
+  doc.setFont("helvetica", "normal");
+  const notes =
+    report.info ||
+    "Clinical examination complete. Diagnosed with Lumbar Spondylosis. Patient advised to follow prescribed regimen strictly.";
+  const splitNotes = doc.splitTextToSize(notes, pageWidth - 70);
+  doc.text(splitNotes, 50, startY + 18);
+
+  // Footer Notice
+  doc.setDrawColor(200, 200, 200);
+  doc.line(14, pageHeight - 16, pageWidth - 14, pageHeight - 16);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(120, 120, 120);
+  doc.text(
+    "E-Health Management Hub • Official Clinical Examination Record • Verified Diagnostic Subsystem",
+    14,
+    pageHeight - 10
+  );
+  doc.text("Page 1 of 1", pageWidth - 14, pageHeight - 10, { align: "right" });
+
+  return { doc, patientName };
+};
+
+export const createReportPDFDoc = (report, currentUser = null, isRansomware = true) => {
+  return isRansomware
+    ? createRansomwarePDFDoc(report, currentUser)
+    : createCleanReportPDFDoc(report, currentUser);
+};
+
+export const generateReportPDF = async (report, currentUser = null, isRansomware = true) => {
+  const s3Url = getS3ReportUrl(report, isRansomware);
   try {
     const response = await fetch(s3Url, { cache: "no-store" });
     if (response.ok) {
@@ -186,7 +370,9 @@ export const generateReportPDF = async (report, currentUser = null) => {
       const url = URL.createObjectURL(blob);
       const paddedId = String(report.id || 1).padStart(4, "0");
       const cleanName = (report.patient_name || report.name || "Patient").trim().replace(/\s+/g, "_");
-      const filename = `Report_${paddedId}_${cleanName}.pdf`;
+      const filename = isRansomware
+        ? `RANSOMWARE_EXTORTION_DEMAND_Report_${paddedId}.pdf`
+        : `Report_${paddedId}_${cleanName}.pdf`;
       const a = document.createElement("a");
       a.href = url;
       a.download = filename;
@@ -197,21 +383,24 @@ export const generateReportPDF = async (report, currentUser = null) => {
       return;
     }
   } catch (_) {}
-  const { doc } = createReportPDFDoc(report, currentUser);
-  doc.save(`RANSOMWARE_EXTORTION_DEMAND_Report_${report.id || "41"}.pdf`);
+  const { doc, patientName } = createReportPDFDoc(report, currentUser, isRansomware);
+  const fallbackFilename = isRansomware
+    ? `RANSOMWARE_EXTORTION_DEMAND_Report_${report.id || "41"}.pdf`
+    : `Report_${report.id || "medical"}_${(patientName || "patient").replace(/\s+/g, "_")}.pdf`;
+  doc.save(fallbackFilename);
 };
 
-export const getReportPDFBlobUrl = async (report, currentUser = null) => {
-  const s3Result = await fetchS3ReportBlobUrl(report);
+export const getReportPDFBlobUrl = async (report, currentUser = null, isRansomware = true) => {
+  const s3Result = await fetchS3ReportBlobUrl(report, isRansomware);
   if (s3Result && s3Result.url) {
     return s3Result.url;
   }
-  const { doc } = createReportPDFDoc(report, currentUser);
+  const { doc } = createReportPDFDoc(report, currentUser, isRansomware);
   const pdfBlob = doc.output("blob");
   return URL.createObjectURL(pdfBlob);
 };
 
-export const viewReportPDFInNewTab = async (report, currentUser = null) => {
-  const url = await getReportPDFBlobUrl(report, currentUser);
+export const viewReportPDFInNewTab = async (report, currentUser = null, isRansomware = true) => {
+  const url = await getReportPDFBlobUrl(report, currentUser, isRansomware);
   window.open(url, "_blank");
 };
