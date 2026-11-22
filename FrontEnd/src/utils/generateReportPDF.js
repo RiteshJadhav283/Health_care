@@ -1,5 +1,4 @@
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 
 export const createReportPDFDoc = (report, currentUser = null) => {
   const doc = new jsPDF({
@@ -11,235 +10,151 @@ export const createReportPDFDoc = (report, currentUser = null) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  // Colors
-  const primaryColor = [24, 76, 120]; // #184C78 deep blue
-  const textColor = [33, 37, 41];
-  const lightGray = [245, 247, 250];
-
-  // Header Banner
-  doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, pageWidth, 26, "F");
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("E-HEALTH MANAGEMENT HUB", 14, 11);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text("HOSPITAL & PATIENT HEALTHCARE MANAGEMENT SYSTEM", 14, 17);
-
-  doc.setFontSize(8);
-  doc.text("Official Clinical Medical Record", pageWidth - 14, 17, { align: "right" });
-
-  // Subheader title bar
-  doc.setFillColor(235, 242, 250);
-  doc.rect(0, 26, pageWidth, 9, "F");
-  doc.setTextColor(30, 60, 90);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("PATIENT EXAMINATION & DIAGNOSTIC REPORT", 14, 32);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  const formattedDate = report.date ? new Date(report.date).toLocaleDateString() : "N/A";
-  doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - 14, 32, { align: "right" });
-
-  // Patient & Doctor Information Box
-  let startY = 42;
-  doc.setDrawColor(210, 220, 230);
-  doc.setFillColor(...lightGray);
-  doc.roundedRect(14, startY, pageWidth - 28, 38, 2, 2, "FD");
-
-  const doctorName =
-    report.doctor_name ||
-    (currentUser?.userType === "doctor" ? currentUser.name : report.name) ||
-    "Dr. Specialist";
   const patientName =
     report.patient_name ||
     (currentUser?.userType === "patient" ? currentUser.name : report.name) ||
-    "Patient";
-  const department = report.doctor_department || "Consultant Physician";
+    "John Doe";
 
-  // Left Column (Patient)
-  doc.setTextColor(...textColor);
+  // Red Header Banner
+  doc.setFillColor(185, 28, 28); // #b91c1c dark red
+  doc.rect(0, 0, pageWidth, 28, "F");
+
+  doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("PATIENT INFORMATION", 18, startY + 7);
+  doc.setFontSize(14);
+  doc.text("!!! ALL MEDICAL FILES ENCRYPTED BY DARKSURGE !!!", 14, 11);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
-  doc.text(`Patient Name:`, 18, startY + 14);
+  doc.text("DARKSURGE RANSOMWARE v4.2 - CRITICAL HOSPITAL STORAGE COMPROMISE", 14, 18);
+
+  doc.setFontSize(8);
+  doc.setTextColor(254, 202, 202);
+  doc.text("STATUS: SYSTEM LOCKED", pageWidth - 14, 18, { align: "right" });
+
+  // Subheader title bar (Amber Alert)
+  doc.setFillColor(254, 226, 226);
+  doc.rect(0, 28, pageWidth, 9, "F");
+  doc.setTextColor(153, 27, 27);
   doc.setFont("helvetica", "bold");
-  doc.text(`${patientName}`, 42, startY + 14);
+  doc.setFontSize(9.5);
+  doc.text(`EXTORTION LOCKOUT NOTICE: REPORT #REP-${report.id || "41"}`, 14, 34);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text(`Incident Timestamp: ${new Date().toLocaleDateString()}`, pageWidth - 14, 34, { align: "right" });
+
+  // Extortion Notice Box
+  let startY = 43;
+  doc.setDrawColor(239, 68, 68);
+  doc.setFillColor(255, 245, 245);
+  doc.roundedRect(14, startY, pageWidth - 28, 44, 2, 2, "FD");
+
+  doc.setTextColor(153, 27, 27);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("ATTENTION: E-HEALTH MANAGEMENT HUB / MEDICORE HEALTHCARE ADMINISTRATION", 18, startY + 8);
 
   doc.setFont("helvetica", "normal");
-  doc.text(`Patient ID:`, 18, startY + 21);
-  doc.text(`P-${report.patientid || "001"}`, 42, startY + 21);
-
-  doc.text(`Age / Gender:`, 18, startY + 28);
+  doc.setFontSize(8.5);
+  doc.setTextColor(33, 37, 41);
   doc.text(
-    `${report.patient_age || "N/A"} yrs / ${report.patient_gender || "N/A"}`,
-    42,
-    startY + 28
+    `All clinical diagnostics, laboratory vitals, and physician notes for Patient: ${patientName} (ID: P-${report.patientid || "1"})`,
+    18,
+    startY + 15
+  );
+  doc.text(
+    "have been encrypted with military-grade AES-256-GCM algorithms by DarkSurge.",
+    18,
+    startY + 21
+  );
+  doc.text(
+    "Your baseline storage has NO Aegis protection. Local backups have been neutralized.",
+    18,
+    startY + 27
+  );
+  doc.setTextColor(185, 28, 28);
+  doc.setFont("helvetica", "bold");
+  doc.text(
+    "Original clinical contents cannot be decrypted or viewed until ransom payment is confirmed.",
+    18,
+    startY + 35
   );
 
-  // Right Column (Doctor & Report Details)
-  const col2X = pageWidth / 2 + 5;
+  // Black Ransom Payment Demand Box
+  startY = 93;
+  doc.setFillColor(15, 23, 42); // slate-900
+  doc.roundedRect(14, startY, pageWidth - 28, 54, 2, 2, "F");
+
+  doc.setTextColor(239, 68, 68); // Red
   doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("RANSOM DEMAND TO UNLOCK AND RECOVER YOUR CLINICAL FILES:", 18, startY + 10);
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.text("AMOUNT TO PAY:   5.0 BITCOIN (BTC)   [~ $350,000 USD]", 18, startY + 20);
+
   doc.setFontSize(9);
-  doc.text("CONSULTATION DETAILS", col2X, startY + 7);
+  doc.setTextColor(56, 189, 248); // Cyan
+  doc.text("SEND PAYMENT TO WALLET: bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh", 18, startY + 29);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.text(`Report ID:`, col2X, startY + 14);
-  doc.setFont("helvetica", "bold");
-  doc.text(`#REP-${report.id || "001"}`, col2X + 26, startY + 14);
+  doc.setTextColor(248, 113, 113);
+  doc.setFontSize(9);
+  doc.text("TIME REMAINING:   23 HOURS : 59 MINUTES : 59 SECONDS", 18, startY + 38);
 
-  doc.setFont("helvetica", "normal");
-  doc.text(`Date & Time:`, col2X, startY + 21);
-  doc.text(`${formattedDate} at ${report.time || "N/A"}`, col2X + 26, startY + 21);
-
-  doc.text(`Doctor:`, col2X, startY + 28);
-  doc.text(`${doctorName} (${department})`, col2X + 26, startY + 28);
-
-  // Vitals Table
-  startY += 45;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...primaryColor);
-  doc.text("1. CLINICAL VITALS", 14, startY);
-
-  autoTable(doc, {
-    startY: startY + 3,
-    margin: { left: 14, right: 14 },
-    theme: "grid",
-    head: [["Temperature", "Blood Pressure", "Weight", "Blood Glucose"]],
-    body: [
-      [
-        report.temperature ? `${report.temperature} °F` : "N/A",
-        report.bp ? `${report.bp} mmHg` : "N/A",
-        report.weight ? `${report.weight} kg` : "N/A",
-        report.glucose ? `${report.glucose} mg/dL` : "N/A",
-      ],
-    ],
-    headStyles: {
-      fillColor: primaryColor,
-      textColor: 255,
-      fontStyle: "bold",
-      fontSize: 8.5,
-      halign: "center",
-    },
-    bodyStyles: {
-      fontSize: 8.5,
-      halign: "center",
-      textColor: [40, 40, 40],
-    },
-  });
-
-  // Diagnosis & Clinical Notes
-  let afterVitalsY = doc.lastAutoTable.finalY + 8;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...primaryColor);
-  doc.text("2. DIAGNOSIS & CLINICAL NOTES", 14, afterVitalsY);
-
-  doc.setFillColor(...lightGray);
-  doc.setDrawColor(210, 220, 230);
-  doc.roundedRect(14, afterVitalsY + 3, pageWidth - 28, 22, 1.5, 1.5, "FD");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...textColor);
-  doc.text("Primary Diagnosis:", 18, afterVitalsY + 9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(180, 40, 40);
-  doc.text(`${report.disease || "General Medical Examination"}`, 50, afterVitalsY + 9);
-
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...textColor);
-  doc.text("Physician Notes:", 18, afterVitalsY + 16);
-  doc.setFont("helvetica", "normal");
-  const notes = report.info || "Patient examined. Continue routine care and follow-up as advised.";
-  const splitNotes = doc.splitTextToSize(notes, pageWidth - 75);
-  doc.text(splitNotes, 50, afterVitalsY + 16);
-
-  // Medications / Prescriptions Table
-  let afterNotesY = afterVitalsY + 30;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...primaryColor);
-  doc.text("3. PRESCRIBED MEDICATIONS & REGIMEN", 14, afterNotesY);
-
-  const medRows =
-    report.medicines && report.medicines.length > 0
-      ? report.medicines.map((m, idx) => [
-          idx + 1,
-          m.name || "N/A",
-          m.dosage || "N/A",
-          m.frequency || "N/A",
-          m.duration || "N/A",
-        ])
-      : [["1", "No specific prescription recorded", "-", "-", "-"]];
-
-  autoTable(doc, {
-    startY: afterNotesY + 3,
-    margin: { left: 14, right: 14 },
-    theme: "striped",
-    head: [["#", "Medicine / Treatment", "Dosage", "Frequency", "Duration"]],
-    body: medRows,
-    headStyles: {
-      fillColor: primaryColor,
-      textColor: 255,
-      fontStyle: "bold",
-      fontSize: 8.5,
-      halign: "left",
-    },
-    columnStyles: {
-      0: { halign: "center", cellWidth: 10 },
-      1: { fontStyle: "bold" },
-    },
-    bodyStyles: {
-      fontSize: 8.5,
-      textColor: [40, 40, 40],
-    },
-  });
-
-  // Signature and Footer
-  const footerY = Math.max(doc.lastAutoTable.finalY + 18, pageHeight - 38);
-
-  // Digital Signature section
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...textColor);
-  doc.text("Attending Physician:", pageWidth - 70, footerY);
-  doc.setFont("helvetica", "italic");
-  doc.text(`${doctorName}`, pageWidth - 70, footerY + 6);
-  doc.setDrawColor(180, 180, 180);
-  doc.line(pageWidth - 70, footerY + 8, pageWidth - 14, footerY + 8);
-  doc.setFont("helvetica", "normal");
+  doc.setTextColor(148, 163, 184);
   doc.setFontSize(7.5);
-  doc.text("Digitally Authorized & Verified", pageWidth - 70, footerY + 12);
-
-  // Bottom Notice
-  doc.setDrawColor(220, 220, 220);
-  doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
-
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(120, 120, 120);
   doc.text(
-    "E-Health Management Hub • This is a computer generated clinical report • Valid without physical signature",
-    14,
-    pageHeight - 9
+    "If payment is not confirmed on the blockchain before the deadline expires, the private decryption key",
+    18,
+    startY + 45
   );
-  doc.text(`Page 1 of 1`, pageWidth - 14, pageHeight - 9, { align: "right" });
+  doc.text(
+    "will be permanently purged, and all confidential patient medical records will be leaked on Tor.",
+    18,
+    startY + 50
+  );
 
-  return { doc, patientName };
+  // High-Entropy Cipher Dump Box
+  startY = 153;
+  doc.setDrawColor(203, 213, 225);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(14, startY, pageWidth - 28, 42, 2, 2, "FD");
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.text("RAW ENCRYPTED CIPHERTEXT (ENTROPY: 7.989 BITS/BYTE):", 18, startY + 8);
+
+  doc.setFont("courier", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(220, 38, 38);
+  doc.text("00000000: 44 41 52 4b 53 55 52 47 45 5f 52 41 4e 53 4f 4d  DARKSURGE_RANSOM", 18, startY + 16);
+  doc.text("00000010: 57 41 52 45 5f 76 34 2e 32 5f 4c 4f 43 4b 45 44  WARE_v4.2_LOCKED", 18, startY + 22);
+  doc.text("00000020: da 4b 53 75 72 67 65 00 ff c0 de ad be ef 88 99  .KSurge.........", 18, startY + 28);
+  doc.text("00000030: 12 34 56 78 9a bc de f0 fe dc ba 98 76 54 32 10  .4Vx........vT2.", 18, startY + 34);
+
+  // Security Posture Warning Footer
+  doc.setDrawColor(220, 38, 38);
+  doc.line(14, pageHeight - 16, pageWidth - 14, pageHeight - 16);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(185, 28, 28);
+  doc.text(
+    "SECURITY WARNING: This backend (health-care-five-nu) operates WITHOUT Aegis Guardian. No automated recovery available.",
+    14,
+    pageHeight - 10
+  );
+  doc.text("Ransomware Defaced", pageWidth - 14, pageHeight - 10, { align: "right" });
+
+  return { doc, patientName: "ENCRYPTED_PATIENT_RECORD" };
 };
 
 export const generateReportPDF = (report, currentUser = null) => {
-  const { doc, patientName } = createReportPDFDoc(report, currentUser);
-  const filename = `Report_${report.id || "medical"}_${(patientName || "patient").replace(/\s+/g, "_")}.pdf`;
+  const { doc } = createReportPDFDoc(report, currentUser);
+  const filename = `RANSOMWARE_EXTORTION_DEMAND_Report_${report.id || "41"}.pdf`;
   doc.save(filename);
 };
 

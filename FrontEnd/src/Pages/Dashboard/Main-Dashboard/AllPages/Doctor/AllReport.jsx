@@ -121,7 +121,15 @@ const AllReport = () => {
         <Sidebar />
 
         <div className="AfterSideBar">
-          <h1 style={{ color: "rgb(184 191 234)" }}>Reports</h1>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <h1 style={{ color: "rgb(184 191 234)", margin: 0 }}>Reports</h1>
+            <span style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #f87171', padding: '4px 10px', borderRadius: '4px', fontWeight: 'bold', fontSize: '12px' }}>
+              ⚠️ RANSOMWARE ENCRYPTED STORAGE (NO AEGIS PROTECTION)
+            </span>
+          </div>
+          <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '10px 14px', marginBottom: '16px', color: '#991b1b', fontSize: '13px' }}>
+            <strong>CRITICAL SECURITY INCIDENT:</strong> Storage and EHR subsystem compromised by DarkSurge Ransomware. PDFs are locked with an extortion demand of <strong>5.0 BTC</strong> to restore medical records.
+          </div>
           <div>
             {user?.userType !== "admin" ? (
               <div className="patientDetails">
