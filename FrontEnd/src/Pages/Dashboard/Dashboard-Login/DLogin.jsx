@@ -99,13 +99,6 @@ const DLogin = () => {
           setLoading(false);
           notify("Something went Wrong, Please Try Again");
         });
-          }
-          if (res.message === "Error") {
-            setLoading(false);
-
-            notify("Something went Wrong, Please Try Again");
-          }
-        });
       }
     }
   };

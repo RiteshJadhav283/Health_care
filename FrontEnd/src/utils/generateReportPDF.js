@@ -1,5 +1,4 @@
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 
 // Live S3 Bucket for Unsecured Baseline Backend in AWS ap-south-1
 export const S3_BASE_URL = "https://medicore-baseline-reports-017080036675.s3.ap-south-1.amazonaws.com/reports";
